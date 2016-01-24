@@ -1,5 +1,5 @@
 <script src="/socket.io/socket.io.js"></script>
-<script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+<script src="/peer.js"></script>
 <script>
 window["socket"] = io(location.hostname+":"+location.port);
 socket.on("connect",           console.info.bind(console, "connect"));
@@ -20,4 +20,18 @@ peer.on('call',         console.info.bind(console, "call"));
 peer.on('close',        console.info.bind(console, "close"));
 peer.on('disconnected', console.info.bind(console, "disconnected"));
 peer.on('error',        console.info.bind(console, "error"));
-<script>
+
+console.log("init");
+
+
+window.navigator["getUserMedia"] = window.navigator.webkitGetUserMedia ||
+                                   window.navigator.mozGetUserMedia    ||
+                                                                      window.navigator.getUserMedia;
+
+
+navigator.getUserMedia({video: false, audio: true}, right, left);
+function left(){ throw err; }
+function right(stream){
+  console.log(stream);
+}
+</script>

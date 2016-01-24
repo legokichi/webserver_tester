@@ -11,8 +11,8 @@ io.on 'connection', (socket)->
   socket.on "echo", (data)-> socket.emit("echo", data)
   socket.on 'disconnect', console.info.bind(console, "socket:disconnect")
 
-server.on "connection", console.info.bind(console, "peer:connection")
-server.on "disconnect", console.info.bind(console, "peer:disconnect")
+server.on "connection", -> console.info("peer:connection")
+server.on "disconnect", -> console.info("peer:disconnect")
 
 server.listen(8083)
 
