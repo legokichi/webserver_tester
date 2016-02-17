@@ -1,37 +1,99 @@
-<script src="/socket.io/socket.io.js"></script>
-<script src="/peer.js"></script>
-<script>
-window["socket"] = io(location.hostname+":"+location.port);
-socket.on("connect",           console.info.bind(console, "connect"));
-socket.on("reconnect",         console.info.bind(console, "reconnect"));
-socket.on("reconnect_attempt", console.info.bind(console, "reconnect_attempt"));
-socket.on("reconnecting",      console.info.bind(console, "reconnecting"));
-socket.on("reconnect_error",   console.info.bind(console, "reconnect_error"));
-socket.on("reconnect_failed",  console.info.bind(console, "reconnect_failed"));
-socket.on("disconnect",        console.info.bind(console, "disconnect"));
-socket.on("error",             console.info.bind(console, "error"));
-socket.on("echo",              console.info.bind(console, "echo"));
-socket.on("connect",           function(){ socket.emit("echo", socket.id); });
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>QUnit Test Suite</title>
+  <link  href="https://cdnjs.cloudflare.com/ajax/libs/qunit/1.18.0/qunit.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qunit/1.18.0/qunit.min.js"></script>
+  <style>
+    .test-message{
+      white-space: pre;
+      font-family: Osaka-mono, "Osaka-等幅", "ＭＳ ゴシック", monospace;
+      font-size: 14px;
+    }
+  </style>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/peer.js"></script>
+  <script>
+  QUnit.module('Network');
+  
+  QUnit.test('socket.io', function (assert) {
+    var done = assert.async();
+    assert.expect(1);
+    window["socket"] = io(location.hostname+":"+location.port);
+    socket.on("connect",           console.info.bind(console, "connect"));
+    socket.on("reconnect",         console.info.bind(console, "reconnect"));
+    socket.on("reconnect_attempt", console.info.bind(console, "reconnect_attempt"));
+    socket.on("reconnecting",      console.info.bind(console, "reconnecting"));
+    socket.on("reconnect_error",   console.info.bind(console, "reconnect_error"));
+    socket.on("reconnect_failed",  console.info.bind(console, "reconnect_failed"));
+    socket.on("disconnect",        console.info.bind(console, "disconnect"));
+    socket.on("error",             console.info.bind(console, "error"));
+    socket.on("echo",              console.info.bind(console, "echo"));
+    socket.on("connect",           function(){ socket.emit("echo", socket.id); });
+    socket.on("error",             left);
+    socket.on("echo",              right);
+    function left(err){
+      assert.ok(false, err);
+      done();
+    }
+    function right(){
+      assert.ok(true, "echo:" + socket.id);
+      done();
+    }
+  });
 
-window["peer"] = new Peer({host: location.hostname, port: location.port, path: "peerjs", secure: true, debug: 3});
-peer.on('open',         console.info.bind(console, "open"));
-peer.on('connection',   console.info.bind(console, "connection"));
-peer.on('call',         console.info.bind(console, "call"));
-peer.on('close',        console.info.bind(console, "close"));
-peer.on('disconnected', console.info.bind(console, "disconnected"));
-peer.on('error',        console.info.bind(console, "error"));
+  QUnit.test('peerjs', function (assert) {
+    var done = assert.async();
+    assert.expect(1);
+    window["peer"] = new Peer({host: location.hostname, port: location.port, path: "peerjs", secure: true, debug: 3});
+    peer.on('open',         console.info.bind(console, "open"));
+    peer.on('connection',   console.info.bind(console, "connection"));
+    peer.on('call',         console.info.bind(console, "call"));
+    peer.on('close',        console.info.bind(console, "close"));
+    peer.on('disconnected', console.info.bind(console, "disconnected"));
+    peer.on('error',        console.info.bind(console, "error"));
+    peer.on('error',        left);
+    peer.on('open',         right);
+    function left(err){
+      assert.ok(false, err);
+      console.error(err);
+      done();
+    }
+    function right(id){
+      assert.ok(true, "open:" + id);
+      done();
+    }
+  });
 
-console.log("init");
+  QUnit.module('GetUserMedia');
+  QUnit.test('GetUserMedia_Audio', function (assert) {
+    var done = assert.async();
+    assert.expect(1);
+    window.navigator["getUserMedia"] = window.navigator.getUserMedia       ||
+                                       window.navigator.webkitGetUserMedia ||
+                                       window.navigator.mozGetUserMedia    ;
 
 
-window.navigator["getUserMedia"] = window.navigator.webkitGetUserMedia ||
-                                   window.navigator.mozGetUserMedia    ||
-                                                                      window.navigator.getUserMedia;
-
-
-navigator.getUserMedia({video: false, audio: true}, right, left);
-function left(){ throw err; }
-function right(stream){
-  console.log(stream);
-}
-</script>
+    navigator.getUserMedia({video: false, audio: true}, right, left);
+    function left(err){
+      assert.ok(false, err);
+      done();
+    }
+    function right(stream){
+      console.log(stream);
+      assert.ok(true, "stream:" + Object.prototype.toString.call(stream));
+      done();
+    }
+  });
+  </script>
+</head>
+<body>
+  <h1 id="qunit-header">QUnit Test Suite</h1>
+  <h2 id="qunit-banner"></h2>
+  <div id="qunit-testrunner-toolbar"></div>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+  <div id="qunit-fixture">test markup</div>
+</body>
+</html>

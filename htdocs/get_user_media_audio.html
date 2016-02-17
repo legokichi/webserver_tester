@@ -1,0 +1,12 @@
+<script>
+window.navigator["getUserMedia"] = window.navigator.getUserMedia       ||
+                                   window.navigator.webkitGetUserMedia ||
+                                   window.navigator.mozGetUserMedia    ;
+
+
+navigator.getUserMedia({video: false, audio: true}, right, left);
+function left(){ throw err; }
+function right(stream){ console.log(stream); }
+
+
+</script>
